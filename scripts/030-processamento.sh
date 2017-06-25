@@ -34,3 +34,33 @@ awk -F '\t' '(NR==FNR){mapa[$1]} (NR!=FNR && !($1 in mapa)){print $0}' R1 /run/s
 awk 'BEGIN{FS="\t"; OFS="\t"} ($4 ~ /\S{2,}/){gsub(/,/,"_",$4); gsub(/\W/,"",$4); print $1,toupper($4)}' gazetteer | sort -k1nr,1 -k2 -u > /run/shm/051-mini-gazetteer
 awk '{n=$0; grep="grep -m 1 \"[\t_]"n"[_$]\" gazetteer"; grep | getline; close(grep); if(n != $0) print n"\t"$1}' /run/shm/051-mini-gazetteer > R2
 awk -F '\t' '(NR==FNR){mapa[$1]} (NR!=FNR && !($1 in mapa)){print $0}' R2 /run/shm/042-locations > /run/shm/043-locations
+
+
+awk -v nome=4 -v id=6 'BEGIN{FS="\t"; OFS=";"} {gsub(/\W/,"",$nome); print $id,toupper($nome)}' paises > /run/shm/065-D0
+awk -v nome=2 -v id=1 'BEGIN{FS="\t"; OFS=";"} {gsub(/\W/,"",$nome); print $id,toupper($nome)}' /run/shm/061-divisao > /run/shm/065-D1
+awk -v nome=2 -v id=1 'BEGIN{FS="\t"; OFS=";"} {gsub(/\W/,"",$nome); print $id,toupper($nome)}' /run/shm/062-divisao > /run/shm/065-D2
+awk -v nome=2 -v id=1 'BEGIN{FS="\t"; OFS=";"} {gsub(/\W/,"",$nome); print $id,toupper($nome)}' /run/shm/063-divisao > /run/shm/065-D3
+awk -v nome=2 -v id=1 'BEGIN{FS="\t"; OFS=";"} {gsub(/\W/,"",$nome); print $id,toupper($nome)}' /run/shm/064-divisao > /run/shm/065-D4
+
+# Algoritmo R3: Encontra localização através da distância editável
+cd ../scripts/
+pip install -t distEditavel/ nltk
+distEditavel/ned.py ';' /run/shm/043-locations /run/shm/065-D0 > /run/shm/090-N0
+distEditavel/ned.py ';' /run/shm/043-locations /run/shm/065-D1 > /run/shm/090-N1
+split /run/shm/065-D2 -l 21278 /run/shm/066-D2
+split /run/shm/065-D3 -l 40000 /run/shm/066-D3
+split /run/shm/065-D4 -l 30428 /run/shm/066-D4
+distEditavel/ned.py ';' /run/shm/043-locations /run/shm/066-D2aa > /run/shm/091-N2a
+distEditavel/ned.py ';' /run/shm/043-locations /run/shm/066-D2ab > /run/shm/091-N2b
+distEditavel/ned.py ';' /run/shm/043-locations /run/shm/066-D3aa > /run/shm/091-N3a
+distEditavel/ned.py ';' /run/shm/043-locations /run/shm/066-D3ab > /run/shm/091-N3b
+distEditavel/ned.py ';' /run/shm/043-locations /run/shm/066-D4aa > /run/shm/091-N4a
+distEditavel/ned.py ';' /run/shm/043-locations /run/shm/066-D4ab > /run/shm/091-N4b
+cat /run/shm/091-N2* | sort -k1,1 -k3n,3 -k2nr,2 | sort -uk1,1 > /run/shm/090-N2
+cat /run/shm/091-N3* | sort -k1,1 -k3n,3 -k2nr,2 | sort -uk1,1 > /run/shm/090-N3
+cat /run/shm/091-N4* | sort -k1,1 -k3n,3 -k2nr,2 | sort -uk1,1 > /run/shm/090-N4
+cd /run/shm/
+awk -f origem/scripts/032-distancia.awk origem/dados/divisoes 090-N* > 081-distancias
+cd origem/dados/
+grep -P '\t0\.([0-5]|6[0-4])[0-9]*\t' /run/shm/081-distancias | sort -k1,3 -k4r | sort -uk1,1 > R3
+awk -F '\t' '(NR==FNR){mapa[$1]} (NR!=FNR && !($1 in mapa)){print $0}' R3 /run/shm/043-locations > _R
