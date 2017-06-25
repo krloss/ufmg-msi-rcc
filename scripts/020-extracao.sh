@@ -14,3 +14,7 @@ unzip fontes/allCountries.zip -d /run/shm/
 awk -F '\t' '($7 ~ /A|P/){print $0}' /run/shm/allCountries.txt | sort -u >  dados/gazetteer
 
 grep '^\w' fontes/geonames_countryInfo.txt | cut -f -2,4,5,9,17 | sort -u > dados/paises
+
+unzip fontes/hierarchy.zip -d /run/shm/
+cd scripts/
+cut -f 4,6 ../dados/paises | awk -f 021-divisao.awk - /run/shm/hierarchy.txt | awk -f 021-divisao.awk - /run/shm/hierarchy.txt | awk -f 021-divisao.awk - /run/shm/hierarchy.txt | awk -f 021-divisao.awk - /run/shm/hierarchy.txt | sort -u > ../dados/divisoes
