@@ -28,3 +28,9 @@ awk -f origem/scripts/031-criterio.awk origem/dados/divisoes 070-N* > 080-criter
 cd origem/dados/
 grep -vP '\t0\.([01]|2[0-4])[0-9]*\t' /run/shm/080-criterios | sort -k1,1 -k2r,2 -k3,3 -k4r | sort -uk 1,1 > R1
 awk -F '\t' '(NR==FNR){mapa[$1]} (NR!=FNR && !($1 in mapa)){print $0}' R1 /run/shm/041-locations > /run/shm/042-locations
+
+
+# Algoritmo R2: Encontra localização por regex dos topônimos
+awk 'BEGIN{FS="\t"; OFS="\t"} ($4 ~ /\S{2,}/){gsub(/,/,"_",$4); gsub(/\W/,"",$4); print $1,toupper($4)}' gazetteer | sort -k1nr,1 -k2 -u > /run/shm/051-mini-gazetteer
+awk '{n=$0; grep="grep -m 1 \"[\t_]"n"[_$]\" gazetteer"; grep | getline; close(grep); if(n != $0) print n"\t"$1}' /run/shm/051-mini-gazetteer > R2
+awk -F '\t' '(NR==FNR){mapa[$1]} (NR!=FNR && !($1 in mapa)){print $0}' R2 /run/shm/042-locations > /run/shm/043-locations
