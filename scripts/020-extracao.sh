@@ -4,10 +4,12 @@ cd ../
 # Usuarios
 7z x -o/run/shm fontes/stackoverflow.com-Users.7z
 grep '\sLocation="[^"]*\w\{2,\}' /run/shm/Users.xml | sed -r 's/.*\s((Id|Location)="[^"]*").*\s((Id|Location)="[^"]*").*/Site="SO";\1;\3/' > /run/shm/010-so-users
+rm /run/shm/Users.xml
 
-sed -r 's/.*"\s\},\s"/site:"GH";/; s/"\s:\s"?/:"/g; s/"?,\s"((id|location):")/";\1/; s/"?\s*}\s*$/";/' fontes/github-users.json > /run/shm/020-gh-users
+sed -r 's/.*"\s\},\s"/site:"GH";/; s/"\s:\s"?/:"/g; s/"?,\s"((id|location):")/";\1/; s/"?\s*}\s*$/";/' fontes/github-users.json > /run/shm/011-gh-users
 
-cat /run/shm/*-users | sed -r 's/.*([Ii]d[:=]"[^"]*").*/\1;&/; s/;([Ii]d[:=]"[^"]*")//; s/([Ii]d|[Ss]ite|[Ll]ocation)[:=]"/"/g' | sed -r 's/\s+/ /g; s/";"/\t/g; s/^"|";*$//g' | sort -u > dados/usuarios
+cat /run/shm/*-users | sed -r 's/.*([Ii]d[:=]"[^"]*").*/\1;&/; s/;([Ii]d[:=]"[^"]*")//; s/([Ii]d|[Ss]ite|[Ll]ocation)[:=]"/"/g' | sed -r 's/\s+/ /g; s/";"/\t/g; s/^"|";*$//g' | sort -u > /run/shm/012-users
+awk 'BEGIN{FS="\t"; OFS="\t"} {print $1,$2,versao[$1,$2]++,$3}' /run/shm/012-users > dados/usuarios
 
 # Enderecos
 unzip fontes/allCountries.zip -d /run/shm/
