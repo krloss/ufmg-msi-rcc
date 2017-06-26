@@ -14,8 +14,15 @@ SELECT id, (GeomFromText(CONCAT('POINT(',lat,' ',lng,')'))) AS coordenadas FROM 
 CREATE TABLE usuarios (
 	id BIGINT NOT NULL, -- siteUserId
 	site CHAR(2) NOT NULL, -- site(GitHub,StackOverflow)
+	versao SMALLINT UNSIGNED NOT NULL, -- itensRepetidos
 	local VARCHAR(250) NOT NULL,
+	algoritmo CHAR(2) NOT NULL,
 	local_id BIGINT NULL,
-	CONSTRAINT pk_usuarios PRIMARY KEY(id,site),
+	CONSTRAINT pk_usuarios PRIMARY KEY(id,site,versao),
 	CONSTRAINT fk_usuarios_locais FOREIGN KEY (local_id) REFERENCES locais(id)
 );
+
+CREATE OR REPLACE VIEW view_usuarios AS
+SELECT local_id, COUNT(id) AS quantidade FROM usuarios GROUP BY local_id;
+
+SHOW VARIABLES LIKE 'max_allowed_packet';
