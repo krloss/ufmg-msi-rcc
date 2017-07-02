@@ -1,0 +1,13 @@
+{
+    "name": "ufmg-msi/rcc-app",
+    "type": "project",
+    "require": {
+        "slim/slim": "^3.8"
+    },
+    "authors": [
+        {
+            "name": "Carlos Henrique",
+            "email": "carloss@ufmg.br"
+        }
+    ]
+}

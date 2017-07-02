@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>UFMG - MSI | Redes de Compartilhamento de Conhecimento</title>
+
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<script src="js/jquery-3.2.1.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+
+	<style type="text/css">
+		html,body { height:100%; margin:0; padding:0px; }
+		.fillHeight { height:560px; }
+		#result { font-size:10px; }
+	</style>
+	<script type="text/javascript">
+		var mapa = {};
+		var heatmap = [];
+
+		function inicia() {
+			mapa = new google.maps.Map(document.getElementById('mapa'),
+				{center:{lat:0.0, lng:0.0}, scrollwheel:false, zoom:2});
+		}
+
+		function pesquisa() {
+			$.post("db",{query:$('#query').val()},function(data) {
+				$('#result').val(data);
+			});
+		}
+		function parseData(data) {
+			var response = [];
+			var map = {};
+
+			data.map(function(it) {
+				var localId = it.id;
+
+				if(!localId) return;
+
+				if(map[localId]) map[localId].weight++;
+				else {
+					map[localId] = {location:new google.maps.LatLng(it.lat,it.lng), weight:it.quantidade || 1};
+					response[response.length] = map[localId];
+				}
+			});
+			
+			return response;
+		}
+		function visualiza() {
+			var dados = JSON.parse($('#result').val());
+			var index = heatmap.length;
+
+			heatmap[index] = new google.maps.visualization.HeatmapLayer({data:parseData(dados), map:mapa});
+
+			heatmap[index].set('dissipating',false);
+			heatmap[index].set('radius',5);
+		}
+		function limpa() {
+			var index = heatmap.length;
+
+			if(index--) heatmap.splice(index).map(it => it.setMap(null));
+		}
+	</script>
+</head>
+<body>
+	<br />
+	<div class="container-fluid">
+		<div class="col-sm-3"> <div class="panel panel-default"> <div class="panel-body"> <form class="fillHeight">
+			<div class="form-group">
+				<label for="query">Query:</label>
+				<textarea class="form-control" rows="5" id="query">SELECT * FROM locais LIMIT 5;
+-- SELECT * FROM usuarios LIMIT 5;</textarea>
+			</div>
+			<button type="button" class="btn btn-primary btn-block" onclick="pesquisa();">Pesquisar</button>
+			<button type="button" class="btn btn-warning btn-block" onclick="limpa();">Limpar</button>
+			<button type="button" class="btn btn-success btn-block" onclick="visualiza();">Visualizar</button>
+			<br>
+			<div class="form-group">
+				<label for="result">Result:</label>
+				<textarea class="form-control" rows="15" id="result" readonly="true"></textarea>
+			</div>
+		</div> </div> </div>
+		<div class="col-sm-9"> <div class="panel panel-default"> <div class="panel-body">
+			<div id="mapa" class="fillHeight"></div>
+		</div> </div> </div> </form>
+	</div>
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9axWdkELRpDB5KbueTFFUT9tr6W-8Vmc&libraries=visualization&callback=inicia" async defer></script>
+</body>
+</html>
