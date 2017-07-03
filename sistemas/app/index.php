@@ -28,7 +28,7 @@ $app->post('/db',function($req, $res, $args=[]) {
 	$requestDB = $this->db->prepare($query);
 
 	$requestDB->execute();
-	return $res->withJson(json_encode($requestDB->fetchAll()));
+	return $res->withJson(json_encode($requestDB->fetchAll(),JSON_PARTIAL_OUTPUT_ON_ERROR));
 });
 
 $app->run();
