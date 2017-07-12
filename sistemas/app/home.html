@@ -25,7 +25,7 @@
 		}
 
 		function pesquisa() {
-			$.post("db",{query:$('#query').val()},function(data) {
+			$.post("index.php/db",{query:$('#query').val()},function(data) {
 				$('#result').val(data);
 			});
 		}
